@@ -1,0 +1,12 @@
+.erase{
+    color: red;
+    cursor: pointer;
+    font-size: 1.5em;
+}
+
+.center{
+    /* background-color: blue; */
+    text-align: center;
+    padding-left: none;
+
+}
