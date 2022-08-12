@@ -108,6 +108,7 @@ const Products = () =>{
   };
 
   const deleteCartItem = (delIndex) => {
+    console.log("in delete cart items");
     // this is the index in the cart not in the Product List
     let newCart = cart.filter((item, i) => delIndex != i);
     let target = cart.filter((item, index) => delIndex == index);
@@ -149,11 +150,12 @@ const Products = () =>{
           </Accordion.Toggle>
         </Card.Header>
         <Accordion.Collapse
-          onClick={() => deleteCartItem(index)}
+          /* onClick={() => deleteCartItem(index)} */
           eventKey={1 + index}
         >
           <Card.Body>
-            $ {item.attributes.cost} from {item.attributes.country}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="erase" onClick={() => deleteCartItem(index)}>[x]</span>
+            $ {item.attributes.cost} from {item.attributes.country}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="erase" onClick={() => deleteCartItem(index)}>[x]</span>
           </Card.Body>
         </Accordion.Collapse>
       </Card>
