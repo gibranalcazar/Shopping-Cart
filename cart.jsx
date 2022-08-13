@@ -1,3 +1,4 @@
+let fetching = 0;
 ////////////////////////////////////////////////////////////////////
 const useDataApi = (initialUrl, initialData) => {
   const { useState, useEffect, useReducer } = React;
@@ -20,7 +21,6 @@ const useDataApi = (initialUrl, initialData) => {
         if (!didCancel) {
           dispatch({ type: "FETCH_SUCCESS", payload: result.data });
           /* console.log(result.data); */
-          
         }
       } catch (error) {
         if (!didCancel) {
@@ -32,7 +32,8 @@ const useDataApi = (initialUrl, initialData) => {
     return () => {
       didCancel = true;
     };
-  }, [url]);
+  /* }, [url]); */
+  }, [fetching]);
   return [state, setUrl];
 };
 ////////////////////////////////////////////////////////////////////
@@ -86,55 +87,56 @@ const Products = () =>{
       data: [],
     }
   );
-/*   console.log(`Rendering Products ${JSON.stringify(data.data[0])}`);
-  console.log(data.data);
-  console.log(items); */
   
   useEffect(()=> {
     /* console.log(data.data); */
-    setItems(data.data);
+    let newItems = data.data.map((item) => {
+      let { name, country, cost, instock, image } = item.attributes;
+      return { name, country, cost, instock, image };
+    });
+    setItems(newItems);
   }, [data.data]);
+  console.log(items);
 
   const addToCart = (e) => {
     let prodName = e.target.name;
-    console.log(items[0].attributes.name);
-    let item = items.filter((objeto) => objeto.attributes.name == prodName);
-    console.log(item[0].attributes.instock);
-    if(item[0].attributes.instock ==0)return;
-    item[0].attributes.instock = item[0].attributes.instock -1;
+    console.log(items[0].name);
+    let item = items.filter((objeto) => objeto.name == prodName);
+    console.log(item[0].instock);
+    if(item[0].instock ==0)return;
+    item[0].instock = item[0].instock -1;
     console.log(`add to Cart ${JSON.stringify(item)}`);
     setCart([...cart, ...item]);
     console.log(cart);
   };
 
   const deleteCartItem = (delIndex) => {
-    console.log("in delete cart items");
     // this is the index in the cart not in the Product List
     let newCart = cart.filter((item, i) => delIndex != i);
     let target = cart.filter((item, index) => delIndex == index);
     let newItems = items.map((item, index) => {
-      if (item.attributes.name == target[0].attributes.name) item.attributes.instock = item.attributes.instock + 1;
+      if (item.name == target[0].name) item.instock = item.instock + 1;
       return item;
     });
     setCart(newCart);
     setItems(newItems);
   };
 
-  let list = data.data.map((item, index) => {
+  let list = items.map((item, index) => {
     let n = index + 1049;
     let uhit = "https://picsum.photos/" + n; //Random image = "uhit" instead of "image"
     //console.log(item.attributes.image);
-    let image = item.attributes.image;
+    let image = item.image;
     return (
       <li key={index}>
         <Image src={image} width={100} roundedCircle></Image> 
         <div>
           <Button variant="primary" size="large">
-          {item.attributes.name}:${item.attributes.cost} Stock={item.attributes.instock}
+          {item.name}:${item.cost} Stock={item.instock}
           </Button>
         </div>
         <div>
-          <input name={item.attributes.name} type="submit" value="Add to cart" onClick={addToCart}></input>
+          <input name={item.name} type="submit" value="Add to cart" onClick={addToCart}></input>
         </div>
       </li>
     );
@@ -146,7 +148,7 @@ const Products = () =>{
       <Card key={index}>
         <Card.Header>
           <Accordion.Toggle as={Button} variant="link" eventKey={1 + index}>
-            {item.attributes.name}
+            {item.name}
           </Accordion.Toggle>
         </Card.Header>
         <Accordion.Collapse
@@ -154,8 +156,7 @@ const Products = () =>{
           eventKey={1 + index}
         >
           <Card.Body>
-            $ {item.attributes.cost} from {item.attributes.country}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="erase" onClick={() => deleteCartItem(index)}>[x]</span>
+            $ {item.cost} from {item.country}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="erase" onClick={() => deleteCartItem(index)}>[x]</span>
           </Card.Body>
         </Accordion.Collapse>
       </Card>
@@ -167,7 +168,7 @@ const Products = () =>{
     let final = cart.map((item, index) => {
       return (
         <div key={index} index={index}>
-          {item.attributes.name}
+          {item.name}
         </div>
       );
     });
@@ -175,12 +176,11 @@ const Products = () =>{
   };
 
   const calculateTotal = () => {
-    console.log(cart);
-    let costs = cart.map((item) => item.attributes.cost);
+    /* console.log(cart); */
+    let costs = cart.map((item) => item.cost);
     const reducer = (accum, current) => accum + current;
     let newTotal = costs.reduce(reducer, 0);
     console.log(`total updated to ${newTotal}`);
-    //cart.map((item, index) => deleteCartItem(index));
     return newTotal;
   };
   const checkOut = () => {
@@ -189,13 +189,15 @@ const Products = () =>{
   };
 
   const restockProducts = (url) => {
+    console.log("In restock products: ");
     console.log(url);
     doFetch(url);
-    /* let newItems = data.data.map((item) => {
-      let { name, country, cost, instock } = item;
-      console.log("In restock products");
-      return { name, country, cost, instock };
-    }); */
+    fetching++;
+    let newItems = data.data.map((item) => {
+      let { name, country, cost, instock, image } = item.attributes;
+      return { name, country, cost, instock, image };
+    });
+    console.log(newItems);
     setItems([...items, ...newItems]);
   };
 
